@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit 1: Storage on My Computer - Smart Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .hidden-section { display: none; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans p-4 md:p-8 min-h-screen flex flex-col items-center">
+
+    <div class="max-w-3xl w-full bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-8 mt-4 fade-in" id="main-card">
+        
+        <!-- Header -->
+        <div id="quiz-header" class="bg-indigo-600 p-6 text-white text-center transition-colors duration-500">
+            <h1 class="text-2xl font-bold">Unit 1: Storage on My Computer</h1>
+            <p id="section-subtitle" class="text-indigo-200 mt-1 text-sm font-medium">Part 1: Multiple Choice</p>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="w-full bg-slate-100 h-2">
+            <div id="progress-bar" class="bg-indigo-400 h-2 transition-all duration-300" style="width: 0%;"></div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="p-6 md:p-8 relative">
+            
+            <div id="question-counter" class="text-sm font-bold text-slate-400 mb-4 tracking-wider uppercase">Question 1 of 10</div>
+            
+            <!-- Question Text -->
+            <h2 id="question-text" class="text-xl font-semibold mb-6 text-slate-800 leading-relaxed"></h2>
+
+            <!-- MCQ Container -->
+            <div id="mcq-container" class="space-y-3 hidden-section"></div>
+
+            <!-- Open Ended Container (Text Area) -->
+            <div id="open-ended-container" class="hidden-section">
+                <textarea id="student-answer" rows="5" class="w-full p-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow resize-y text-slate-700" placeholder="Type your detailed answer here..."></textarea>
+                <button id="check-answer-btn" class="mt-4 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors w-full shadow-sm">Check My Answer</button>
+            </div>
+
+            <!-- Instant Feedback Area -->
+            <div id="feedback-container" class="hidden mt-6 p-5 rounded-xl border fade-in">
+                
+                <!-- MCQ Feedback -->
+                <div id="mcq-feedback" class="hidden-section">
+                    <p id="mcq-title" class="font-bold mb-2 text-lg"></p>
+                    <p id="mcq-rationale" class="text-slate-700"></p>
+                </div>
+
+                <!-- Open Ended Feedback -->
+                <div id="oe-feedback" class="hidden-section">
+                    <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-200/60">
+                        <h3 class="font-bold text-lg text-slate-800">Automated Scoring Result</h3>
+                        <span id="oe-score" class="px-3 py-1 bg-slate-100 font-bold text-lg rounded-lg text-slate-700">0/100</span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <p class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-2">Keyword Analysis:</p>
+                        <div id="keyword-badges" class="flex flex-wrap gap-2"></div>
+                    </div>
+
+                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 mt-6">
+                        <p class="text-xs font-bold text-blue-500 uppercase tracking-wider mb-1">Model Answer</p>
+                        <p id="model-answer" class="text-blue-900 text-sm leading-relaxed"></p>
+                    </div>
+                </div>
+
+                <button id="next-btn" class="mt-6 px-6 py-3 bg-slate-800 hover:bg-slate-900 text-white font-medium rounded-xl transition-colors w-full">Next Question ➔</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Final Results Screen -->
+    <div id="results-container" class="hidden max-w-3xl w-full bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden text-center p-10 fade-in">
+        <h2 class="text-4xl font-bold text-slate-800 mb-3">Quiz Complete!</h2>
+        <p class="text-slate-500 mb-8 text-lg">Great job working through all sections on Storage and Devices.</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="bg-indigo-50 p-8 rounded-2xl border border-indigo-100">
+                <p class="text-indigo-600 font-bold mb-2 uppercase tracking-wide">MCQ Score</p>
+                <p class="text-5xl font-bold text-indigo-900" id="final-mcq-score">0/10</p>
+            </div>
+            <div class="bg-teal-50 p-8 rounded-2xl border border-teal-100">
+                <p class="text-teal-600 font-bold mb-2 uppercase tracking-wide">Short Answer Avg</p>
+                <p class="text-5xl font-bold text-teal-900" id="final-sa-score">0%</p>
+            </div>
+        </div>
+        
+        <button onclick="location.reload()" class="px-8 py-4 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl transition-colors shadow-lg">Retake Quiz</button>
+    </div>
+
+    <script>
+        // --- QUIZ DATA ---
+        const mcqData = [
+            { q: "What are computing devices connected to the Internet that collect information and perform actions called?", opts: ["Internet of Things (IoT)", "Modems", "Storage Devices", "Personal Area Networks"], ans: 0, reason: "Devices like smart TVs, smart lights, and thermostats connected to the Internet are called the Internet of Things (IoT)." },
+            { q: "In the Input-Process-Output (IPO) model, which stage involves transforming or analyzing the data?", opts: ["Input", "Process", "Output", "Storage"], ans: 1, reason: "The Process stage transforms the input data into something useful or analyzes it to make decisions." },
+            { q: "Which type of storage allows you to access your files from anywhere as long as you have an internet connection?", opts: ["Internal storage", "USB flash drive", "Cloud storage", "Memory card"], ans: 2, reason: "Cloud storage (like Google Drive) stores files online, letting you access them from any internet-connected device." },
+            { q: "Where are large amounts of data for things like websites and YouTube videos physically stored?", opts: ["In your computer's internal storage", "In a server farm", "On a USB flash drive", "In a router"], ans: 1, reason: "A server farm is a large center full of computer servers that store and manage huge amounts of data." },
+            { q: "What wireless technology allows you to transfer files between devices that are very near each other?", opts: ["Email", "Network sharing", "Bluetooth", "Cloud storage"], ans: 2, reason: "Bluetooth is a wireless technology used to transfer files over short distances." },
+            { q: "When you send data over the Internet, it is divided into smaller pieces. What are these pieces called?", opts: ["Binary digits", "Data packets", "Kilobytes", "Subfolders"], ans: 1, reason: "Data travels through the internet in small pieces called data packets, which are reassembled at their destination." },
+            { q: "What is the number system that uses only two digits, 0 and 1, to represent data in a computer?", opts: ["Decimal", "Alphabetical", "Binary", "Hexadecimal"], ans: 2, reason: "The binary system uses only 0 and 1. All information processed by a computer is in this form." },
+            { q: "How many bits make up one byte?", opts: ["2", "8", "1024", "1000"], ans: 1, reason: "1 byte is equal to 8 bits. For example, a single letter is represented by a byte." },
+            { q: "Which of the following memory units is the largest?", opts: ["Kilobyte (KB)", "Megabyte (MB)", "Terabyte (TB)", "Gigabyte (GB)"], ans: 2, reason: "The order from smallest to largest is: Bit, Byte, Kilobyte, Megabyte, Gigabyte, Terabyte." },
+            { q: "What can you do to a large folder to make it take up less space before sending it via email?", opts: ["Compress it into a zip file", "Upload it to a memory card", "Change the file extension", "Delete the root folder"], ans: 0, reason: "Compressing files creates a .zip file that takes up less space, making it easier to transfer." }
+        ];
+
+        const saqData = [
+            { 
+                q: "What are the two main things Internet of Things (IoT) devices do when connected to the Internet?",
+                keywords: [{name: "Collect Information/Input", words: ["collect", "gather", "input", "detect", "receive"]}, {name: "Perform Actions/Actuators", words: ["perform", "action", "actuator", "output", "move"]}],
+                model: "IoT devices generally do two things: they collect information from their surroundings (Input), and they perform actions based on that information (Actuators)."
+            },
+            { 
+                q: "Briefly explain the three stages of the Input-Process-Output (IPO) model.",
+                keywords: [{name: "Input", words: ["input", "receive", "enter"]}, {name: "Process", words: ["process", "transform", "analyze", "calculate"]}, {name: "Output", words: ["output", "produce", "outcome", "result", "show"]}],
+                model: "First, Input receives the data. Next, Process transforms or analyzes the data. Finally, Output produces an outcome or action based on the processed data."
+            },
+            { 
+                q: "State one benefit and one challenge of using Cloud Storage.",
+                keywords: [{name: "Benefit (Space/Anywhere/Backup)", words: ["benefit", "advantage", "large space", "anywhere", "access", "backup"]}, {name: "Challenge (Internet/Security)", words: ["challenge", "disadvantage", "internet", "connection", "security", "outage"]}],
+                model: "A benefit is that cloud storage offers large storage space and is accessible from anywhere. A challenge is that it requires an internet connection to work and has potential security risks."
+            },
+            { 
+                q: "What is a 'server farm'?",
+                keywords: [{name: "Servers/Computers", words: ["server", "computer", "machine"]}, {name: "Store/Manage Data", words: ["store", "manage", "process", "huge", "large amount", "internet"]}],
+                model: "A server farm is a large center full of computer servers that store, process, and manage huge amounts of data for people all around the world."
+            },
+            { 
+                q: "Explain the difference between 'uploading' and 'downloading' a file.",
+                keywords: [{name: "Upload (Device to Internet)", words: ["upload", "send", "from device", "to internet", "to other"]}, {name: "Download (Internet to Device)", words: ["download", "receive", "get", "from internet", "to device"]}],
+                model: "Uploading means sending a file from your device to the Internet, while downloading means receiving a file from the Internet onto your device."
+            },
+            { 
+                q: "What happens to a file when it travels across the Internet?",
+                keywords: [{name: "Packets/Small Pieces", words: ["packet", "small piece", "divide", "break", "split"]}, {name: "Reassemble/Destination", words: ["reassemble", "come together", "destination", "reach"]}],
+                model: "The file is divided into smaller pieces called data packets. These packets travel through the network and are reassembled when they reach their destination."
+            },
+            { 
+                q: "What is the binary number system?",
+                keywords: [{name: "Two digits (0 and 1)", words: ["two", "digit", "0", "1", "zero", "one"]}, {name: "Computer Information", words: ["computer", "process", "represent", "information", "data"]}],
+                model: "The binary system is a number system that uses only two digits, 0 and 1. All information processed by a computer is represented using sequences of these two digits."
+            },
+            { 
+                q: "List the following memory sizes in order from SMALLEST to LARGEST: Gigabyte, Bit, Megabyte, Byte, Kilobyte, Terabyte.",
+                keywords: [{name: "Bit", words: ["bit"]}, {name: "Byte", words: ["byte"]}, {name: "Kilobyte", words: ["kilo", "kb"]}, {name: "Megabyte", words: ["mega", "mb"]}, {name: "Gigabyte", words: ["giga", "gb"]}, {name: "Terabyte", words: ["tera", "tb"]}],
+                model: "Bit -> Byte -> Kilobyte -> Megabyte -> Gigabyte -> Terabyte."
+            },
+            { 
+                q: "If a file is too large to send directly via email, what is one method you can use to share it with a friend?",
+                keywords: [{name: "Compress/Zip OR Cloud Storage", words: ["compress", "zip", "smaller", "cloud", "google drive", "link", "upload"]}],
+                model: "You can compress the file into a .zip folder to make it smaller, or you can upload it to cloud storage (like Google Drive) and send your friend a download link."
+            },
+            { 
+                q: "Give an example of how an IoT device acts as an 'actuator'.",
+                keywords: [{name: "Action Performed", words: ["action", "work", "move", "turn on", "turn off", "heat", "cool", "adjust"]}, {name: "Device Example", words: ["thermostat", "light", "robot", "sprinkler", "lock", "alarm"]}],
+                model: "An actuator performs an action based on data. For example, a smart thermostat turning on the heater when it gets cold, or a smart light turning on when someone enters the room."
+            }
+        ];
+
+        // --- STATE VARIABLES ---
+        let currentSection = 1; // 1: MCQ, 2: SAQ
+        let currentIndex = 0;
+        let isAnswered = false;
+
+        // Scores
+        let mcqScore = 0;
+        let saqScoreTotal = 0;
+
+        // --- DOM ELEMENTS ---
+        const header = document.getElementById('quiz-header');
+        const subtitle = document.getElementById('section-subtitle');
+        const progressBar = document.getElementById('progress-bar');
+        const questionCounter = document.getElementById('question-counter');
+        const questionText = document.getElementById('question-text');
+        
+        const mcqContainer = document.getElementById('mcq-container');
+        const oeContainer = document.getElementById('open-ended-container');
+        const studentAnswerBox = document.getElementById('student-answer');
+        const checkAnswerBtn = document.getElementById('check-answer-btn');
+        
+        const feedbackContainer = document.getElementById('feedback-container');
+        const mcqFeedback = document.getElementById('mcq-feedback');
+        const oeFeedback = document.getElementById('oe-feedback');
+        const nextBtn = document.getElementById('next-btn');
+
+        // --- CORE LOGIC ---
+
+        function updateUI() {
+            isAnswered = false;
+            feedbackContainer.classList.add('hidden');
+            mcqFeedback.classList.add('hidden-section');
+            oeFeedback.classList.add('hidden-section');
+            
+            let currentData, totalInSection;
+
+            if (currentSection === 1) {
+                currentData = mcqData[currentIndex];
+                totalInSection = mcqData.length;
+                header.className = "bg-indigo-600 p-6 text-white text-center transition-colors duration-500";
+                subtitle.textContent = "Part 1: Multiple Choice";
+                
+                mcqContainer.classList.remove('hidden-section');
+                oeContainer.classList.add('hidden-section');
+                buildMCQ(currentData);
+            } 
+            else if (currentSection === 2) {
+                currentData = saqData[currentIndex];
+                totalInSection = saqData.length;
+                header.className = "bg-teal-600 p-6 text-white text-center transition-colors duration-500";
+                subtitle.textContent = "Part 2: Short Answer";
+                
+                mcqContainer.classList.add('hidden-section');
+                oeContainer.classList.remove('hidden-section');
+                studentAnswerBox.value = "";
+                studentAnswerBox.disabled = false;
+                checkAnswerBtn.classList.remove('hidden');
+            } 
+
+            questionText.textContent = currentData.q;
+            questionCounter.textContent = `Question ${currentIndex + 1} of ${totalInSection}`;
+            
+            // Progress Bar (Total 20 questions)
+            const absoluteProgress = (((currentSection - 1) * 10) + currentIndex) / 20 * 100;
+            progressBar.style.width = `${absoluteProgress}%`;
+            
+            // Color progress bar based on section
+            progressBar.className = `h-2 transition-all duration-300 ${currentSection === 1 ? 'bg-indigo-400' : 'bg-teal-400'}`;
+        }
+
+        function buildMCQ(data) {
+            mcqContainer.innerHTML = '';
+            data.opts.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 rounded-xl border border-slate-200 hover:border-indigo-500 hover:bg-indigo-50 transition-colors duration-200 text-slate-700 font-medium";
+                btn.innerHTML = `<span class="inline-block w-6 h-6 rounded-full bg-slate-200 text-slate-600 text-center text-sm leading-6 mr-3 font-bold">${String.fromCharCode(65 + index)}</span> ${opt}`;
+                btn.onclick = () => gradeMCQ(index, btn, data);
+                mcqContainer.appendChild(btn);
+            });
+        }
+
+        function gradeMCQ(selectedIndex, selectedBtn, data) {
+            if (isAnswered) return;
+            isAnswered = true;
+
+            const buttons = mcqContainer.querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.classList.remove('hover:border-indigo-500', 'hover:bg-indigo-50', 'cursor-pointer');
+                btn.classList.add('cursor-default', 'opacity-50');
+            });
+
+            selectedBtn.classList.remove('opacity-50');
+            mcqFeedback.classList.remove('hidden-section');
+
+            if (selectedIndex === data.ans) {
+                mcqScore++;
+                selectedBtn.classList.replace('border-slate-200', 'border-green-500');
+                selectedBtn.classList.add('bg-green-50', 'text-green-800');
+                
+                document.getElementById('mcq-title').textContent = "✅ Correct!";
+                document.getElementById('mcq-title').className = "font-bold mb-2 text-lg text-green-700";
+                feedbackContainer.className = "mt-6 p-5 rounded-xl border border-green-200 bg-green-50 fade-in";
+            } else {
+                selectedBtn.classList.replace('border-slate-200', 'border-red-500');
+                selectedBtn.classList.add('bg-red-50', 'text-red-800');
+                
+                // Show right answer
+                buttons[data.ans].classList.remove('opacity-50', 'border-slate-200');
+                buttons[data.ans].classList.add('border-green-500', 'bg-green-50');
+
+                document.getElementById('mcq-title').textContent = "❌ Incorrect";
+                document.getElementById('mcq-title').className = "font-bold mb-2 text-lg text-red-700";
+                feedbackContainer.className = "mt-6 p-5 rounded-xl border border-red-200 bg-red-50 fade-in";
+            }
+
+            document.getElementById('mcq-rationale').textContent = data.reason;
+            feedbackContainer.classList.remove('hidden');
+        }
+
+        // AUTO GRADER LOGIC
+        checkAnswerBtn.onclick = () => {
+            const input = studentAnswerBox.value.trim();
+            if(input.length < 3) {
+                alert("Please type a slightly longer answer before checking!");
+                return;
+            }
+            
+            isAnswered = true;
+            studentAnswerBox.disabled = true;
+            checkAnswerBtn.classList.add('hidden');
+            
+            const data = saqData[currentIndex];
+            const textToAnalyse = input.toLowerCase();
+            
+            let matched = 0;
+            const badgeContainer = document.getElementById('keyword-badges');
+            badgeContainer.innerHTML = '';
+
+            // Keyword Scanning
+            data.keywords.forEach(kwObj => {
+                // simple substring check
+                const isFound = kwObj.words.some(word => textToAnalyse.includes(word.toLowerCase()));
+                
+                const badge = document.createElement('span');
+                if(isFound) {
+                    matched++;
+                    badge.className = "px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 border border-green-200";
+                    badge.innerHTML = `✓ ${kwObj.name}`;
+                } else {
+                    badge.className = "px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 border border-red-200";
+                    badge.innerHTML = `✗ Missed: ${kwObj.name}`;
+                }
+                badgeContainer.appendChild(badge);
+            });
+
+            // Scoring
+            const scorePercent = Math.round((matched / data.keywords.length) * 100);
+            document.getElementById('oe-score').textContent = `${scorePercent}% Match`;
+            
+            if(scorePercent === 100) document.getElementById('oe-score').className = "px-3 py-1 bg-green-100 font-bold text-lg rounded-lg text-green-700";
+            else if(scorePercent > 0) document.getElementById('oe-score').className = "px-3 py-1 bg-yellow-100 font-bold text-lg rounded-lg text-yellow-700";
+            else document.getElementById('oe-score').className = "px-3 py-1 bg-red-100 font-bold text-lg rounded-lg text-red-700";
+
+            saqScoreTotal += scorePercent;
+
+            document.getElementById('model-answer').textContent = data.model;
+            
+            oeFeedback.classList.remove('hidden-section');
+            feedbackContainer.className = "mt-6 p-5 rounded-xl border border-slate-200 bg-white fade-in shadow-sm";
+            feedbackContainer.classList.remove('hidden');
+        };
+
+        // Navigation
+        nextBtn.onclick = () => {
+            const arrLength = currentSection === 1 ? mcqData.length : saqData.length;
+            
+            currentIndex++;
+            if (currentIndex >= arrLength) {
+                // Next Section
+                currentSection++;
+                currentIndex = 0;
+                
+                if(currentSection > 2) {
+                    progressBar.style.width = `100%`;
+                    showFinalResults();
+                    return;
+                }
+            }
+            updateUI();
+            
+            // Scroll to top of card
+            document.getElementById('main-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+
+        function showFinalResults() {
+            document.getElementById('main-card').classList.add('hidden');
+            const results = document.getElementById('results-container');
+            results.classList.remove('hidden');
+            
+            document.getElementById('final-mcq-score').textContent = `${mcqScore}/10`;
+            document.getElementById('final-sa-score').textContent = `${Math.round(saqScoreTotal / saqData.length)}%`;
+        }
+
+        // Init
+        updateUI();
+
+    </script>
+</body>
+</html>
