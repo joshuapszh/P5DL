@@ -86,7 +86,7 @@
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4 sm:p-8">
+<body class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 relative pb-16">
 
     <!-- LANDING PAGE -->
     <div id="landing-view" class="w-full max-w-4xl mx-auto flex flex-col items-center justify-center slide-up">
@@ -222,10 +222,17 @@
         </button>
 
         <div class="border-t border-gray-100 w-full pt-6 text-sm text-gray-400 flex flex-col items-center">
-            <span class="mb-1 uppercase tracking-widest text-xs font-semibold">Student Credentials</span>
+            <span class="mb-1 uppercase tracking-widest text-xs font-semibold">Student Record</span>
             <span>Name: ______________________</span>
             <span>Class: ______________________</span>
         </div>
+    </div>
+
+    <!-- CREDENTIALS FOOTER -->
+    <div class="fixed bottom-4 text-center w-full pointer-events-none">
+        <span class="text-xs text-gray-400 font-semibold tracking-wide bg-white/80 px-4 py-1 rounded-full backdrop-blur-sm border border-gray-100 shadow-sm">
+            Created by Joshua Poon
+        </span>
     </div>
 
     <script>
